@@ -1,0 +1,132 @@
+const Discord = require('discord.js');
+const bot = new Discord.Client();
+const settings = require('./settings.json');
+var Cleverbot = require('cleverbot-node');
+var cleverbot = new Cleverbot();
+cleverbot.configure({botapi: 'CC23fqSLFvHNPr25hf5isUwAujg'});
+const prefix = "->";
+var ball8 = [
+  "yes",
+  "no",
+  "maybe",
+  "wanna get high?",
+  "what did you ask? sorry im high."
+]
+var adminList = [
+
+]
+bot.on('ready',() => {
+	console.log('I\'m Online\nI\'m Online');
+});
+
+bot.on('roleDelete', role => {
+  let guild = role.guild;
+  guild.defaultChannel.sendMessage(`${role.name} role was deleted.`)
+});
+
+bot.on('message', message => {
+  if (message.author.equals(bot.user)) return;
+  if (message.author.bot) return;
+  if (!message.content.startsWith(prefix)) return;
+  var args = message.content.substring(prefix.length).split(" ");
+  let arg = message.content.split(" ").slice(1);
+  var argsresult = arg.join(' ');
+
+  switch(args[0].toLowerCase()){
+    case "420":
+      message.reply("you buying?");
+      break;
+
+
+    case "chat":
+    message.reply("Still in testing");
+      break;
+
+    case "info":
+        message.reply("I smoke weed and you can talk to me using ->help");
+        break;
+
+
+      case "8ball":
+        if (args[1]){
+          message.reply(ball8[Math.floor((Math.random() * ball8.length))]);}else {
+          message.reply("Are you high thats not a question.");}
+          break;
+
+
+      case "help":
+        var embed = new Discord.RichEmbed()
+        .setColor("4169e1")
+        .addField("Prefix", "->")
+        .addField("User Commands", "help\n420\ninfo\n8ball\navatar\nadd\nuser @name", true)
+        .addField("Admin Commands", "kick @name", true)
+        .addField("Owner Commands", "admin @name", true)
+        .setFooter("Creator of this bot is: Brakk");
+        message.reply("here");
+        message.channel.sendEmbed(embed);
+        break;
+
+      case "setgame":
+        bot.user.setGame(argsresult);
+        break;
+
+      case "avatar":
+      message.reply(message.author.avatarURL);
+      break;
+
+      case "add":
+      let numArray = arg.map(n=> parseInt(n))
+      let answer = numArray.reduce( (p, c) => p+c);
+      message.reply("Those numbers equal " + answer + " now lets get high.");
+      break;
+
+      case "user":
+      let mention = message.mentions.users.first();
+      let user = mention ? mention : message.author;
+      let member = message.guild.members.get(user.id);
+      var embeds = new Discord.RichEmbed()
+      .setColor("4169e1")
+      .setThumbnail(user.avatarURL)
+      .addField("Name", `${member.displayName}#${user.discriminator}`)
+      .addField("ID", `${user.id}`)
+      .addField("Roles", member.roles.map(roles => `<@&${roles.id}>`).join(", "))
+      .addField("Bot?", user.bot ? "Yes" : "No");
+      message.channel.sendEmbed(embeds);
+      break;
+
+      case "kick":
+      let usercheck = message.mentions.users.first();
+      let user_to_kick = usercheck ? usercheck : message.author;
+      let member_to_kick = message.guild.members.get(user_to_kick.id);
+      if(message.author.id == message.guild.ownerID || adminList.indexOf(usercheck) || message.guild.member(bot.user).hasPermission("KICK_MEMBER")){
+        message.reply("You can use this command");
+        if(message.mentions.users.size === 0){
+          message.reply("You didnt tell me who to kick, but i can tell you where to get some crack.");
+        }else {
+          let kick_Member = message.guild.member(message.mentions.users.first());
+          kick_Member.kick(message.author.username + " Kicked this user");
+        }
+      }else {
+        message.reply("You cannot use this command");
+      }
+      break;
+
+      case "admin":
+      let mencheck = message.mentions.users.first();
+      let user_to_admin = mencheck ? mencheck : message.author;
+      let member_to_admin = message.guild.members.get(user_to_admin.id);
+      if(message.author.id == message.guild.ownerID){
+        message.reply("You can use this command");
+        adminList.push(mencheck.id);
+      }else {
+        message.reply("You cannot use this command");
+      }
+      break;
+
+      default:
+      message.reply("I am not programmed for this function, wanna get high?");
+      break;
+}
+});
+
+bot.login(settings.token);
